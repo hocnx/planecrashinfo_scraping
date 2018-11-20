@@ -10,9 +10,9 @@ from time import sleep
 def request_to_server(url):
     response = None
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         return response
-    except requests.exceptions.ConnectionError:
+    except :
         print("sleep for 10 seconds")
         sleep(10)
         response = request_to_server(url)
@@ -37,7 +37,7 @@ if(response.status_code == 200):
 
     # loop for each year
     for year, data in year_data.items():
-        
+
         # request to list of year's crashes
         response_year = request_to_server(data["url"])
         parser_year = BeautifulSoup(response_year.content, 'html.parser')
