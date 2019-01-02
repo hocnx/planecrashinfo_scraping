@@ -7,6 +7,17 @@ import progressbar
 from time import sleep
 
 
+def get_span_with_regex(search_string, regex):
+    pattern = re.compile(regex)
+    matches = pattern.finditer(search_string)
+
+    for match in matches:
+        match = match.span()
+
+    span = search_string[match[0]:match[1]]
+    return span
+
+
 def request_to_server(url):
     response = None
     try:
@@ -73,60 +84,35 @@ if(response.status_code == 200):
 
             # get all aboard
             aboard = data[9]
-            pattern = re.compile(r'^\d+|^\W')
-            matches = pattern.finditer(aboard)
+            # pattern = re.compile(r'^\d+|^\W')
+            # matches = pattern.finditer(aboard)
 
-            for match in matches:
-                all_aboard_span = match.span()
+            # for match in matches:
+            #     all_aboard_span = match.span()
 
-            all_aboard = aboard[all_aboard_span[0]:all_aboard_span[1]]
+            # all_aboard = aboard[all_aboard_span[0]:all_aboard_span[1]]
+            all_aboard = get_span_with_regex(aboard, r'^\d+|^\W')
 
             # get all passengers aboard
-            pattern = re.compile(r'(?<=\(passengers:)\d+|(?<=\(passengers:)\W')
-            matches = pattern.finditer(aboard)
-
-            for match in matches:
-                passengers_aboard_span = match.span()
-
-            passengers_aboard = aboard[passengers_aboard_span[0]:passengers_aboard_span[1]]
+            passengers_aboard = get_span_with_regex(
+                aboard, r'(?<=\(passengers:)\d+|(?<=\(passengers:)\W')
 
             # get all crew aboard
-            pattern = re.compile(r'(?<=crew:)\d+|(?<=crew:)\W')
-            matches = pattern.finditer(aboard)
-
-            for match in matches:
-                crew_aboard_span = match.span()
-
-            crew_aboard = aboard[crew_aboard_span[0]:crew_aboard_span[1]]
+            crew_aboard = get_span_with_regex(
+                aboard, r'(?<=crew:)\d+|(?<=crew:)\W')
 
             # get all fatalities
-
             fatalities = data[10]
-            pattern = re.compile(r'^\d+|^\W')
-            matches = pattern.finditer(fatalities)
 
-            for match in matches:
-                all_fatalities_span = match.span()
-
-            all_fatalities = fatalities[all_fatalities_span[0]:all_fatalities_span[1]]
+            all_fatalities = get_span_with_regex(fatalities, r'^\d+|^\W')
 
             # get all passengers fatalities
-            pattern = re.compile(r'(?<=\(passengers:)\d+|(?<=\(passengers:)\W')
-            matches = pattern.finditer(fatalities)
-
-            for match in matches:
-                passengers_fatalities_span = match.span()
-
-            passengers_fatalities = fatalities[passengers_fatalities_span[0]:passengers_fatalities_span[1]]
+            passenger_fatalities = get_span_with_regex(
+                fatalities, r'(?<=\(passengers:)\d+|(?<=\(passengers:)\W')
 
             # get all crew fatalities
-            pattern = re.compile(r'(?<=crew:)\d+|(?<=crew:)\W')
-            matches = pattern.finditer(fatalities)
-
-            for match in matches:
-                crew_fatalities_span = match.span()
-
-            crew_fatalities = fatalities[crew_fatalities_span[0]:crew_fatalities_span[1]]
+            crew_fatalities = get_span_with_regex(
+                fatalities, r'(?<=crew:)\d+|(?<=crew:)\W')
 
             # remove aboard info and store each value separately
             data.pop(9)
@@ -137,7 +123,7 @@ if(response.status_code == 200):
             # remove fatalities info and store each value separately
             data.pop(12)
             data.insert(12, all_fatalities)
-            data.insert(13, passengers_fatalities)
+            data.insert(13, passenger_fatalities)
             data.insert(14, crew_fatalities)
 
             csv_writer.writerow(data)
